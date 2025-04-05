@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IDS SYSTEM</title>
+</head>
+<body>
+    <h2>Enter Input Data</h2>
+    <form method="POST">
+        {% for feat in ['pkts', 'bytes', 'sbytes', 'dbytes', 'rate', 'mean', 'stddev', 'sum', 'proto', 'state', 'dur'] %}
+            <label>{{ feat }}:</label>
+            <input type="text" name="{{ feat }}" required><br><br>
+        {% endfor %}
+        <button type="submit">Predict</button>
+    </form>
+</body>
+</html>

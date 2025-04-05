@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Result</title>
+</head>
+<body>
+    <h2>Prediction Result</h2>
+    <p><strong>Predicted Label:</strong> {{ result.label }}</p>
+    <p><strong>Confidence:</strong> {{ result.confidence }}</p>
+
+    <h3>Class Probabilities:</h3>
+    <ul>
+    {% for label, prob in result.probabilities.items() %}
+        <li>{{ label }}: {{ prob }}</li>
+    {% endfor %}
+    </ul>
+
+    <br>
+    <a href="/">Predict Again</a>
+</body>
+</html>
