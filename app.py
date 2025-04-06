@@ -1,8 +1,11 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 import torch
 import torch.nn as nn
 import numpy as np
 import joblib
+import os
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 app = Flask(__name__)
 
@@ -48,7 +51,6 @@ class SpinalSAENet(nn.Module):
         x = self.classifier(x)
         return x
 
-
 # === Load Model & Scaler === #
 model = SpinalSAENet(input_dim=11, hidden_dims=[128, 64], num_classes=5).to(device)
 model.load_state_dict(torch.load("spinal_saenet_best.pth", map_location=device))
@@ -56,12 +58,10 @@ model.eval()
 
 scaler = joblib.load("scaler.pkl")
 
-# === Flask Routes === #
 @app.route("/", methods=["GET", "POST"])
 def predict():
     if request.method == "POST":
         try:
-            # Get input values
             input_data = [float(request.form[feat]) for feat in required_features]
             input_array = np.array([input_data], dtype=np.float32)
             input_scaled = scaler.transform(input_array)
@@ -73,10 +73,21 @@ def predict():
                 predicted_class = int(np.argmax(probs))
                 confidence = probs[predicted_class]
 
+            # === Generate and save confusion matrix image === #
+            y_true = [predicted_class]  # For demo purposes
+            y_pred = [predicted_class]
+            cm = confusion_matrix(y_true, y_pred, labels=list(label_mapping.keys()))
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=label_mapping.values())
+            disp.plot(cmap='Blues', colorbar=False)
+            os.makedirs('static', exist_ok=True)
+            plt.savefig(os.path.join('static', 'confusion_matrix.png'))
+            plt.close()
+
             result = {
                 "label": label_mapping[predicted_class],
                 "confidence": f"{confidence:.4f}",
-                "probabilities": {label_mapping[i]: f"{prob:.4f}" for i, prob in enumerate(probs)}
+                "probabilities": {label_mapping[i]: f"{prob:.4f}" for i, prob in enumerate(probs)},
+                "cm_image": "confusion_matrix.png"
             }
 
             return render_template("result.html", result=result)
@@ -86,8 +97,13 @@ def predict():
 
     return render_template("form.html")
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0',port=5000)
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
 
-#if __name__ == "__main__":
- #   app.run(debug=True)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
+
+#if __name__ == '__main__':
+   # os.makedirs('static', exist_ok=True)
+    #app.run(debug=True)
