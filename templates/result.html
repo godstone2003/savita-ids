@@ -1,21 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Prediction Result</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { color: #333; }
+        .result { margin-top: 20px; }
+        .confusion-matrix { margin-top: 30px; }
+        .probs { margin-top: 10px; }
+        .probs table { border-collapse: collapse; width: 300px; }
+        .probs th, .probs td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    </style>
 </head>
 <body>
-    <h2>Prediction Result</h2>
-    <p><strong>Predicted Label:</strong> {{ result.label }}</p>
-    <p><strong>Confidence:</strong> {{ result.confidence }}</p>
 
-    <h3>Class Probabilities:</h3>
-    <ul>
-    {% for label, prob in result.probabilities.items() %}
-        <li>{{ label }}: {{ prob }}</li>
-    {% endfor %}
-    </ul>
+    <h1>Prediction Result</h1>
 
-    <br>
-    <a href="/">Predict Again</a>
+    <div class="result">
+        <p><strong>Predicted Label:</strong> {{ result.label }}</p>
+        <p><strong>Confidence:</strong> {{ result.confidence }}</p>
+
+        <div class="probs">
+            <h3>Probabilities:</h3>
+            <table>
+                <tr><th>Label</th><th>Probability</th></tr>
+                {% for label, prob in result.probabilities.items() %}
+                <tr><td>{{ label }}</td><td>{{ prob }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="confusion-matrix">
+            <h3>Confusion Matrix:</h3>
+            <img src="{{ url_for('static', filename=result.cm_image) }}" alt="Confusion Matrix">
+        </div>
+    </div>
+
 </body>
 </html>
