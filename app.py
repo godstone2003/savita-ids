@@ -4,7 +4,12 @@ import torch.nn as nn
 import numpy as np
 import joblib
 import os
+import matplotlib
+matplotlib.use('Agg')  # Prevents GUI issues in background threads
+
 import matplotlib.pyplot as plt
+
+
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 app = Flask(__name__)
@@ -74,8 +79,8 @@ def predict():
                 confidence = probs[predicted_class]
 
             # === Generate and save confusion matrix image === #
-            y_true = [predicted_class]  # For demo purposes
-            y_pred = [predicted_class]
+            y_true = [predicted_class]  # Simulated true label for demo
+            y_pred = [predicted_class]  # Simulated prediction
             cm = confusion_matrix(y_true, y_pred, labels=list(label_mapping.keys()))
             disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=label_mapping.values())
             disp.plot(cmap='Blues', colorbar=False)
@@ -104,6 +109,5 @@ def static_files(filename):
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
 
-#if __name__ == '__main__':
-   # os.makedirs('static', exist_ok=True)
-    #app.run(debug=True)
+#if __name__ == "__main__":
+ # app.run(debug=True)  
